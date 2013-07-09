@@ -2,3 +2,5 @@
 .pydevproject.txt
 *.pyc
 *Thumbs.db
+client_secrets.json
+infofile.py

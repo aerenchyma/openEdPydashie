@@ -7,14 +7,17 @@ import datetime
 import collections
 import coffeescript
 import SocketServer
+import requests
+from bs4 import BeautifulSoup
+import urllib
 from datetime import date, timedelta
 from repeated_timer import RepeatedTimer
 from flask import Flask, render_template, Response, send_from_directory, request, current_app
 from googleanalytics_apiaccess_timeseries_try import GA_Text_Info as gti 
-import requests
 
-## TODO: bit where we can pick and moderate a couple quotes/comments about things, push them to if we want...
-## is that too much human-work? maybe.
+
+## TODO: choose time range (html5 date input management? or jquery?)
+
 
 app = Flask(__name__)
 
@@ -130,6 +133,7 @@ def sec_buzzwords():
     send_event('secbuzzwords', buzzwords_data)
 
 # this is making the graph happen
+# TODO make the graphs real data, careful about limit hits and updates
 def sample_convergence(days_back=30): # this needs to refresh and change, which it isn't now doing
     global seedX
     if not seedX:
@@ -157,23 +161,33 @@ def sec_convergence(days_back=30):
     send_event('sec_convergence', item_data)
 
 ## Python port of @ephigenia's youtube_video job for original Dashing: https://github.com/foobugs/foobugs-dashboard/blob/master/jobs/youtube_video.rb
-# def youtube_stats(days_back=30):
-#     ## code to get all YT urls in course or unit / all vid-ids is important part
-#     ## TODO how to generalize appropriately
-#     ## TODO (aggr by unit still a problem)
-#     vids = [] # placeholder list for all relevant yt vid ids (see above)
-#     baseurl = "http://gdata.youtube.com/feeds/api/videos?q=%sv=2&alt=jsonc"
-#     for vid in vids:
-#         resp = requests.get(baseurl % (vid))
-#         if resp.code != "200":
-#             print "YouTube API error (status code %s)\n (%s)" % (resp.code, resp.body)
-#         else:
-#             videos = json.parse(resp.body)['data']['items']
-#             send_event('youtube_vid_rating', videos[0]['ratingCount'])
-#             send_event('youtube_vid_views', videos[0]['viewCount'])
-#             send_event('youtube_vid_likes', videos[0]['likeCount'])
-#             send_event('youtube_vid_comments', videos[0]['commentCount'])
-#             send_event('youtube_vid_favs', videos[0]['favoriteCount'])
+## alterations for aggregate vids instead of single video
+def youtube_stats(days_back=30):
+    ## code to get all YT urls in course or unit / all vid-ids is important part
+    ## TODO how to generalize appropriately
+    ## TODO (aggr by unit still a problem)
+    mats = "http://open.umich.edu%s" % (infofile.pgpath) + "/materials"
+    vids = [] # placeholder list for all relevant yt vid ids (see above)
+    baseurl = "http://gdata.youtube.com/feeds/api/videos?q=%sv=2&alt=jsonc"
+    aggregateStats = {'ratings':0,'views':0,'likes':0,'comments':0,'favs':0}
+    for vid in vids:
+        resp = requests.get(baseurl % (vid))
+        if resp.code != "200":
+            print "YouTube API error (status code %s)\n (%s)" % (resp.code, resp.body)
+        else:
+            videos = json.parse(resp.body)['data']['items']
+            aggregateStats['ratings'] += videos[0]['ratingCount']
+            aggregateStats['views'] += videos[0]['viewCount']
+            aggregateStats['likes'] += videos[0]['likeCount']
+            aggregateStats['comments'] += videos[0]['commentCount']
+            aggregateStats['favs'] += videos[0]['favoriteCount']
+
+    send_event('youtube_vid_rating', aggregateStats['ratings'])
+    send_event('youtube_vid_views', aggregateStats['views'])
+    send_event('youtube_vid_likes', aggregateStats['likes'])
+    send_event('youtube_vid_comments', aggregateStats['comments'])
+    send_event('youtube_vid_favs', aggregateStats['favs'])
+        # these should be able to use the number widget 
 
 
 def close_stream(*args, **kwargs):
@@ -184,6 +198,7 @@ def close_stream(*args, **kwargs):
 if __name__ == "__main__":
     SocketServer.BaseServer.handle_error = close_stream
     
+    # TODO make this neater
     # calling functions at first so immediate data on run; update after a day of time
     sample_buzzwords()
     sec_buzzwords()
@@ -199,7 +214,7 @@ if __name__ == "__main__":
     sec_convergence()
 
     refreshJobs = [
-        (sample_synergy, 10,),
+        (sample_synergy, 10,), # TODO replace this w/ YT (?) or figure out what to do with it
         (sample_buzzwords, 86400,), # 86400 seconds in a day
         (sec_buzzwords, 86400,),
         (sample_convergence, 86400,),
