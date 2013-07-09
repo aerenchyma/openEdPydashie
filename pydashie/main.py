@@ -7,8 +7,14 @@ import datetime
 import collections
 import coffeescript
 import SocketServer
+from datetime import date, timedelta
 from repeated_timer import RepeatedTimer
 from flask import Flask, render_template, Response, send_from_directory, request, current_app
+from googleanalytics_apiaccess_timeseries_try import GA_Text_Info as gti 
+import requests
+
+## TODO: bit where we can pick and moderate a couple quotes/comments about things, push them to if we want...
+## is that too much human-work? maybe.
 
 app = Flask(__name__)
 
@@ -101,32 +107,74 @@ def send_event(widget_id, body):
         event_queue.put(formatted_json)
     
 def sample_synergy():
+    # some single number event that changes often enough to make this widget interesting, ?
     synergy_data = {'value': random.randint(0, 100)}
     send_event('synergy', synergy_data)                
     
 def sample_buzzwords():
-    my_little_pony_names = ['Rainbow Dash',
-                            'Blossomforth',
-                            'Derpy',
-                            'Fluttershy',
-                            'Lofty',
-                            'Scootaloo',
-                            'Skydancer']
-    items = [{'label': pony_name, 'value': random.randint(0, 20)} for pony_name in my_little_pony_names]
+    """Nations the given page/path(s) was viewed from + number of times viewed"""
+    df = gti(90)
+    nations_vals = df.get_more_info_tups()
+    print nations_vals
+    items = [{'label': country[0], 'value': country[1]} for country in nations_vals]
     buzzwords_data = {'items':items}
     send_event('buzzwords', buzzwords_data)
 
-def sample_convergence():
+def sec_buzzwords():
+    """Cities, same otherwise"""
+    dt = gti(90)
+    cities_vals = dt.get_cities_tups()
+    print cities_vals
+    items = [{'label':city[0], 'value': city[1]} for city in cities_vals]
+    buzzwords_data = {'items':items}
+    send_event('secbuzzwords', buzzwords_data)
+
+# this is making the graph happen
+def sample_convergence(days_back=30): # this needs to refresh and change, which it isn't now doing
     global seedX
     if not seedX:
         seedX = 0
     items.append({'x':seedX, 
                   'y':random.randint(0,20)})
     seedX += 1
+
     if len(items) > 10:
         items.popleft()
     item_data = {'points': list(items)}
     send_event('convergence', item_data)
+
+def sec_convergence(days_back=30):
+    global seedX
+    if not seedX:
+        seedX = 0
+    items.append({'x':seedX, 
+                  'y':random.randint(0,75)})
+    seedX += 1
+
+    if len(items) > 10:
+        items.popleft()
+    item_data = {'points': list(items)}
+    send_event('sec_convergence', item_data)
+
+## Python port of @ephigenia's youtube_video job for original Dashing: https://github.com/foobugs/foobugs-dashboard/blob/master/jobs/youtube_video.rb
+# def youtube_stats(days_back=30):
+#     ## code to get all YT urls in course or unit / all vid-ids is important part
+#     ## TODO how to generalize appropriately
+#     ## TODO (aggr by unit still a problem)
+#     vids = [] # placeholder list for all relevant yt vid ids (see above)
+#     baseurl = "http://gdata.youtube.com/feeds/api/videos?q=%sv=2&alt=jsonc"
+#     for vid in vids:
+#         resp = requests.get(baseurl % (vid))
+#         if resp.code != "200":
+#             print "YouTube API error (status code %s)\n (%s)" % (resp.code, resp.body)
+#         else:
+#             videos = json.parse(resp.body)['data']['items']
+#             send_event('youtube_vid_rating', videos[0]['ratingCount'])
+#             send_event('youtube_vid_views', videos[0]['viewCount'])
+#             send_event('youtube_vid_likes', videos[0]['likeCount'])
+#             send_event('youtube_vid_comments', videos[0]['commentCount'])
+#             send_event('youtube_vid_favs', videos[0]['favoriteCount'])
+
 
 def close_stream(*args, **kwargs):
     event_stream_port = args[2][1]
@@ -136,10 +184,26 @@ def close_stream(*args, **kwargs):
 if __name__ == "__main__":
     SocketServer.BaseServer.handle_error = close_stream
     
+    # calling functions at first so immediate data on run; update after a day of time
+    sample_buzzwords()
+    sec_buzzwords()
+
+    sample_convergence()
+    sample_convergence()
+    sample_convergence()
+    sample_convergence()
+
+    sec_convergence()
+    sec_convergence()
+    sec_convergence()
+    sec_convergence()
+
     refreshJobs = [
-        (sample_synergy, 1,),
-        (sample_buzzwords, 30,),
-        (sample_convergence, 1,),
+        (sample_synergy, 10,),
+        (sample_buzzwords, 86400,), # 86400 seconds in a day
+        (sec_buzzwords, 86400,),
+        (sample_convergence, 86400,),
+        (sec_convergence, 86400,),
     ]
 
     timers = [RepeatedTimer(time, function) for function, time in refreshJobs]
