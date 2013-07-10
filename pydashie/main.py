@@ -7,17 +7,19 @@ import datetime
 import collections
 import coffeescript
 import SocketServer
-import requests
+import requests, json
+import infofile
 from bs4 import BeautifulSoup
 import urllib
 from datetime import date, timedelta
 from repeated_timer import RepeatedTimer
 from flask import Flask, render_template, Response, send_from_directory, request, current_app
 from googleanalytics_apiaccess_timeseries_try import GA_Text_Info as gti 
+from googleanalytics_apiaccess_timeseries_try import get_country
 
 
 ## TODO: choose time range (html5 date input management? or jquery?)
-
+## TODO: include total reach numbers in all global reach widgets
 
 app = Flask(__name__)
 
@@ -25,6 +27,11 @@ events_queue = {}
 items = collections.deque()
 last_events = {}
 seedX = 0
+# days_back -- default 90 -- but want to get this value from input; if no input, 90
+# if not db:
+#     days_back = 90
+# else:
+#     days_back = db
 
 @app.route("/")
 def hello():
@@ -128,7 +135,8 @@ def sec_buzzwords():
     dt = gti(90)
     cities_vals = dt.get_cities_tups()
     print cities_vals
-    items = [{'label':city[0], 'value': city[1]} for city in cities_vals]
+    cvals = [(city[0],get_country(city[0]),city[1]) for city in cities_vals]
+    items = [{'label':city[0]+", "+city[1], 'value': city[2]} for city in cvals]
     buzzwords_data = {'items':items}
     send_event('secbuzzwords', buzzwords_data)
 
@@ -167,27 +175,37 @@ def youtube_stats(days_back=30):
     ## TODO how to generalize appropriately
     ## TODO (aggr by unit still a problem)
     mats = "http://open.umich.edu%s" % (infofile.pgpath) + "/materials"
-    vids = [] # placeholder list for all relevant yt vid ids (see above)
-    baseurl = "http://gdata.youtube.com/feeds/api/videos?q=%sv=2&alt=jsonc"
+    vids = ["p4hIzgqA9io"] # placeholder list for all relevant yt vid ids (see above)
+    baseurl = "http://gdata.youtube.com/feeds/api/videos?q=%s&v=2&alt=jsonc"
     aggregateStats = {'ratings':0,'views':0,'likes':0,'comments':0,'favs':0}
+
+    ok = False
     for vid in vids:
         resp = requests.get(baseurl % (vid))
-        if resp.code != "200":
-            print "YouTube API error (status code %s)\n (%s)" % (resp.code, resp.body)
-        else:
-            videos = json.parse(resp.body)['data']['items']
-            aggregateStats['ratings'] += videos[0]['ratingCount']
-            aggregateStats['views'] += videos[0]['viewCount']
-            aggregateStats['likes'] += videos[0]['likeCount']
-            aggregateStats['comments'] += videos[0]['commentCount']
-            aggregateStats['favs'] += videos[0]['favoriteCount']
+        # try: resp.status_code != "200":
+        #     print "YouTube API error (status code %s)" % (resp.status_code)
+        if resp.status_code == 200:
+            ok = True
+            videos = json.loads(resp.text)['data']['items']
+            aggregateStats['ratings'] += int(videos[0]['ratingCount'])
+            aggregateStats['views'] += int(videos[0]['viewCount'])
+            aggregateStats['likes'] += int(videos[0]['likeCount'])
+            aggregateStats['comments'] += int(videos[0]['commentCount'])
+            aggregateStats['favs'] += int(videos[0]['favoriteCount'])
 
-    send_event('youtube_vid_rating', aggregateStats['ratings'])
-    send_event('youtube_vid_views', aggregateStats['views'])
-    send_event('youtube_vid_likes', aggregateStats['likes'])
-    send_event('youtube_vid_comments', aggregateStats['comments'])
-    send_event('youtube_vid_favs', aggregateStats['favs'])
-        # these should be able to use the number widget 
+        else:
+            print "YouTube API error (status code %s)" % (resp.status_code)
+    if ok:
+        # send_event('youtube_vid_rating', aggregateStats['ratings'])
+        # send_event('youtube_vid_views', aggregateStats['views'])
+        # send_event('youtube_vid_likes', aggregateStats['likes'])
+        # send_event('youtube_vid_comments', aggregateStats['comments'])
+        # send_event('youtube_vid_favs', aggregateStats['favs'])
+            # these should be able to use the number widget 
+        print "Views: %s" % aggregateStats['views']
+        item_data = {'value': aggregateStats['views']}
+        send_event('youtube_vid_views', item_data)
+       
 
 
 def close_stream(*args, **kwargs):
@@ -200,6 +218,9 @@ if __name__ == "__main__":
     
     # TODO make this neater
     # calling functions at first so immediate data on run; update after a day of time
+
+    youtube_stats()
+
     sample_buzzwords()
     sec_buzzwords()
 
@@ -219,6 +240,7 @@ if __name__ == "__main__":
         (sec_buzzwords, 86400,),
         (sample_convergence, 86400,),
         (sec_convergence, 86400,),
+        (youtube_stats, 86400,),
     ]
 
     timers = [RepeatedTimer(time, function) for function, time in refreshJobs]

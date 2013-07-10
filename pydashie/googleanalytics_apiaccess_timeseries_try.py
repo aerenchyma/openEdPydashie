@@ -1,5 +1,6 @@
 import sys
 import infofile
+import requests, json
 import get_material_links
 from pylab import * #?
 import numpy as np 
@@ -16,6 +17,13 @@ from oauth2client.tools import run
 
 # structural stuff, TODO
 # generalization; TODO
+
+def get_country(city_name):
+	baseurl = "http://maps.googleapis.com/maps/api/geocode/json?address=%s&sensor=false" % city_name
+	r = requests.get(baseurl)
+	d = json.loads(r.text)
+	country = d["results"][0]["address_components"][-1]["short_name"]
+	return country
 
 class GoogleAnalyticsData(object):
 	def __init__(self, days_back=30):
