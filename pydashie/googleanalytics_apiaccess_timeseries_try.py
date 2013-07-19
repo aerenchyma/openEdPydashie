@@ -202,6 +202,12 @@ class GABulkDownloads(GABulkDownloads_Views):
 		#fig.show()
 		return fig
 
+class GA_Info_forTime(GA_Text_Info):
+	def hash_by_day(self):
+		views_day_ranges = {} # over range of past days_back number days
+		for i in range(0,self.days_back):
+
+
 class GA_Text_Info(GABulkDownloads_Views):
 	# depends on the main fxn in GABulkDownloads_Views -- this calls deal_with_results()
 	def return_info(self):
