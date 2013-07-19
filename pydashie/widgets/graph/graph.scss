@@ -43,6 +43,18 @@ $tick-color:        rgba(0, 0, 0, 0.4);
 
   .x_tick {
     position: absolute;
+    display: none;
+    bottom: 0;
+    .title {
+      font-size: 20px;
+      color: $tick-color;
+      opacity: 0.5;
+      padding-bottom: 3px;
+    }
+  }
+
+  .custom_x_label {
+    position: absolute;
     bottom: 0;
     .title {
       font-size: 20px;

@@ -22,7 +22,10 @@ def get_country(city_name):
 	baseurl = "http://maps.googleapis.com/maps/api/geocode/json?address=%s&sensor=false" % city_name
 	r = requests.get(baseurl)
 	d = json.loads(r.text)
-	country = d["results"][0]["address_components"][-1]["short_name"]
+	if "country" in d["results"][0]["address_components"][-1]["types"]:
+		country = d["results"][0]["address_components"][-1]["short_name"]
+	else:
+		country = d["results"][0]["address_components"][-2]["short_name"]
 	return country
 
 class GoogleAnalyticsData(object):
@@ -131,6 +134,11 @@ class GABulkDownloads_Views(GoogleAnalyticsData):
 		self.CLIENT_SECRETS = 'client_secrets.json'
 		# helpful msg if it's missing
 		self.MISSING_CLIENT_SECRETS_MSG = '%s is missing' % self.CLIENT_SECRETS
+		## TODO need to handle non-bulk-download pages appropriately
+		# if self.get_bulk_dl_link() != 0:
+		# 	self.paramlist = [int(infofile.profileid),self.get_bulk_dl_link()] # needs error checking TODO
+		# else:
+		# 	self.paramlist = [int(infofile.profileid)]
 		self.paramlist = [int(infofile.profileid),self.get_bulk_dl_link()] # needs error checking TODO
 		self.paramlist_second = [int(infofile.profileid), infofile.pgpath]
 		self.FLOW = flow_from_clientsecrets(self.CLIENT_SECRETS, scope='https://www.googleapis.com/auth/analytics.readonly', message=self.MISSING_CLIENT_SECRETS_MSG)
@@ -149,6 +157,9 @@ class GABulkDownloads_Views(GoogleAnalyticsData):
 				if "Download all" in link.text: # depends on current page lang/phrasing
 					response = br.follow_link(link)
 					url = response.geturl()
+				# else:
+				# 	print "No bulk download available"
+				# 	#return 0
 			return url[len("http://open.umich.edu"):] # if no Download All, error -- needs checking + graceful handling
 
 	def get_results_other(self, service, profile_id):
@@ -233,8 +244,10 @@ class GA_Text_Info(GABulkDownloads_Views):
 		start = self.proper_start_date() # change to change num of days back 
 		end = str(date.today())
 		# return query.execute()
-		return self.service.data().ga().get(ids='ga:%s' % (profile_id), start_date=start,end_date=end,metrics='ga:pageviews',dimensions='ga:date',sort='ga:date',filters='ga:pagePath==%s' % (self.paramlist[1])).execute()#(sys.argv[2])).execute()
-
+		if self.get_bulk_dl_link() != 0:
+			return self.service.data().ga().get(ids='ga:%s' % (profile_id), start_date=start,end_date=end,metrics='ga:pageviews',dimensions='ga:date',sort='ga:date',filters='ga:pagePath==%s' % (self.paramlist[1])).execute()#(sys.argv[2])).execute()
+		#else:
+			# need to handle non-bulk-download links appropriately! TODO 
 # but a different function that will get all the infos because it will take infodict?? that is a possibility, though ugly NTS
 	
 	def get_more_info_tups(self, top_what=10): # don't need to pass in infodict b/c class attr now
