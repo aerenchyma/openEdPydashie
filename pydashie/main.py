@@ -42,20 +42,6 @@ def hello():
 
 @app.route("/assets/application.js")
 def javascripts():
-#    scripts = [
-#        'assets/javascripts/jquery.js',
-#        'assets/javascripts/es5-shim.js',
-#        'assets/javascripts/d3.v2.min.js',
-#        'assets/javascripts/batman.js',
-#        'assets/javascripts/batman.jquery.js',
-#        'assets/javascripts/jquery.gridster.js',
-#        'assets/javascripts/jquery.leanModal.min.js',
-#        'assets/javascripts/dashing.coffee',
-#        'assets/javascripts/jquery.knob.js',
-#        'assets/javascripts/rickshaw.min.js',
-#        'assets/javascripts/application.coffee',
-#        'assets/javascripts/dashing.gridster.coffee'
-#    ]
     scripts = ['assets/javascripts/application.js']
     
     base_directory = os.getcwd()
@@ -217,18 +203,13 @@ if __name__ == "__main__":
     SocketServer.BaseServer.handle_error = close_stream
     
     # TODO make this neater
-    # calling functions at first so immediate data on run; update after a day of time
+    # calling functions at first so immediate data on run; update after a day of time running
+    # (startup will run these and thus update)
     get_vid_ids()
     youtube_stats()
     sample_buzzwords()
     sec_buzzwords()
-    # sample_convergence()
-    # sample_convergence()
-    # sample_convergence()
     sample_convergence()
-    # sec_convergence()
-    # sec_convergence()
-    # sec_convergence()
     sec_convergence()
 
     refreshJobs = [
