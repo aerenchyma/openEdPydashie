@@ -16,6 +16,7 @@ from repeated_timer import RepeatedTimer
 from flask import Flask, render_template, Response, send_from_directory, request, current_app
 from googleanalytics_apiaccess_timeseries_try import GA_Text_Info as gti 
 from googleanalytics_apiaccess_timeseries_try import get_country
+from googleanalytics_apiaccess_timeseries_try import GA_Info_forTime as gft 
 
 
 ## TODO: choose time range (html5 date input management? or jquery?)
@@ -149,9 +150,9 @@ def sample_convergence(): # this needs to refresh and change, which it isn't now
     smp = gti()
     #smp.return_info()["Total Page Views"]
 
-    # global seedX
-    # if not seedX:
-    #     seedX = 0
+    global seedX
+    if not seedX:
+         seedX = 0
     items.append({'x':seedX, 
                   'y':random.randint(0,26)})
     s = sum([d['y'] for d in items])
@@ -169,55 +170,40 @@ def sample_convergence(): # this needs to refresh and change, which it isn't now
     send_event('convergence', item_data)
 
 def sec_convergence(days_back=30):
-    global seedX
-    if not seedX:
-        seedX = 0
-    items.append({'x':seedX, 
-                  'y':random.randint(21,75)})
-    seedX += 1
 
-    if len(items) > 10:
-        items.popleft()
+#     datalists = [[('20130623', 0)],[('20130624', 1)],[('20130625', 0)],[('20130626', 2)],[('20130627', 1)],
+# [('20130628', 6)],
+# [('20130629', 2)],
+# [('20130630', 4)],
+# [('20130701', 2)],
+# [('20130702', 0)],
+# [('20130703', 1)],
+# [('20130704', 1)],
+# [('20130705', 0)],
+# [('20130706', 2)],
+# [('20130707', 0)],
+# [('20130708', 2)],
+# [('20130709', 1)],
+# [('20130710', 0)],
+# [('20130711', 1)],
+# [('20130712', 1)],
+# [('20130713', 2)],
+# [('20130714', 2)],
+# [('20130715', 3)],
+# [('20130716', 0)],
+# [('20130717', 5)],
+# [('20130718', 2)],
+# [('20130719', 3)],
+# [('20130720', 0)],
+# [('20130721', 1)],
+#[('20130722', 0)]] # testing testing, changed that 6 from another number
+
+    gt = gft(90) # past 90 days
+    datalists = gt.main()
+    items = [{'x':int(ld[0]),'y':ld[1][0][1]} for ld in list(enumerate(datalists))]
     item_data = {'points': list(items)}
     send_event('sec_convergence', item_data)
 
-## Python port of @ephigenia's youtube_video job for original Dashing: https://github.com/foobugs/foobugs-dashboard/blob/master/jobs/youtube_video.rb
-## alterations for aggregate vids instead of single video
-# def youtube_stats(days_back=30):
-#     ## code to get all YT urls in course or unit / all vid-ids is important part
-#     ## TODO how to generalize appropriately
-#     ## TODO (aggr by unit still a problem)
-#     mats = "http://open.umich.edu%s" % (infofile.pgpath) + "/materials"
-#     vids = ["p4hIzgqA9io"] # placeholder list for all relevant yt vid ids (see above)
-#     baseurl = "http://gdata.youtube.com/feeds/api/videos?q=%s&v=2&alt=jsonc"
-#     aggregateStats = {'ratings':0,'views':0,'likes':0,'comments':0,'favs':0}
-
-#     ok = False
-#     for vid in vids:
-#         resp = requests.get(baseurl % (vid))
-#         # try: resp.status_code != "200":
-#         #     print "YouTube API error (status code %s)" % (resp.status_code)
-#         if resp.status_code == 200:
-#             ok = True
-#             videos = json.loads(resp.text)['data']['items']
-#             aggregateStats['ratings'] += int(videos[0]['ratingCount'])
-#             aggregateStats['views'] += int(videos[0]['viewCount'])
-#             aggregateStats['likes'] += int(videos[0]['likeCount'])
-#             aggregateStats['comments'] += int(videos[0]['commentCount'])
-#             aggregateStats['favs'] += int(videos[0]['favoriteCount'])
-
-#         else:
-#             print "YouTube API error (status code %s)" % (resp.status_code)
-#     if ok:
-#         # send_event('youtube_vid_rating', aggregateStats['ratings'])
-#         # send_event('youtube_vid_views', aggregateStats['views'])
-#         # send_event('youtube_vid_likes', aggregateStats['likes'])
-#         # send_event('youtube_vid_comments', aggregateStats['comments'])
-#         # send_event('youtube_vid_favs', aggregateStats['favs'])
-#             # these should be able to use the number widget 
-#         print "Views: %s" % aggregateStats['views']
-#         item_data = {'value': aggregateStats['views']}
-#         send_event('number', item_data)
  
 def id_from_url(url):
     index = url.find("watch?v=") + 8
@@ -289,9 +275,9 @@ if __name__ == "__main__":
     sample_convergence()
     sample_convergence()
 
-    sec_convergence()
-    sec_convergence()
-    sec_convergence()
+    # sec_convergence()
+    # sec_convergence()
+    # sec_convergence()
     sec_convergence()
 
     refreshJobs = [

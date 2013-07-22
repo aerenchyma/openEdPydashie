@@ -202,10 +202,7 @@ class GABulkDownloads(GABulkDownloads_Views):
 		#fig.show()
 		return fig
 
-class GA_Info_forTime(GA_Text_Info):
-	def hash_by_day(self):
-		views_day_ranges = {} # over range of past days_back number days
-		for i in range(0,self.days_back):
+
 
 
 class GA_Text_Info(GABulkDownloads_Views):
@@ -372,6 +369,47 @@ class GA_Text_Info(GABulkDownloads_Views):
 		 	print "Did you provide a profile id and a path as cli arguments? (Do you need to?) Try again."
 		else: # should run if it did not hit an except clause
 			return self.deal_with_results(res)
+
+class GA_Info_forTime(GA_Text_Info):
+	def hash_by_day(self):
+		views_day_ranges = {} # over range of past days_back number days
+		today = date.today()
+		dates_overall = []
+		for i in sorted(range(0,self.days_back), reverse=True):
+			date_to_get = today - timedelta(days=i)
+			# get results and handle results for the prope get_results fxn
+			results = self.get_results(self.service, self.profile_id, date_to_get)
+			date_views_tup = [(str(x[0]), int(x[1])) for x in results.get('rows')] # this is from other return_results so it may not work
+			#print date_views_tup
+			dates_overall.append(date_views_tup) # presumably each date_views_tup will only have one elem, take out extra layer (TODO fix if this is not so)
+		print dates_overall
+		return dates_overall
+
+	def get_results(self, service, profile_id, start): # start should be a proper start date, and it should be whatever SINGLE date, which is gotten by in a wrapper timedeltaing from start of pd to today
+		# query = service.data().ga().get(ids='ga:%s' % profile_id, start_date='2010-03-01',end_date='2013-05-15',metrics='ga:pageviews',dimensions='ga:pagePath',filters='ga:pagePath==%s' % (sys.argv[2]))
+		# return query.execute()
+		end = start #+ timedelta(days=1)
+		#end = date.today()
+		return self.service.data().ga().get(ids='ga:%s' % (profile_id), start_date=str(start),end_date=str(end),metrics='ga:pageviews',dimensions='ga:date',filters='ga:pagePath==%s' % (self.paramlist[1])).execute()#(sys.argv[2])).execute()
+	
+	def main(self):
+		self.service = self.initialize_service()
+		try:
+			self.profile_id = self.paramlist[0]
+			if not self.profile_id:
+				# results = self.get_results(self.service, self.profile_id)
+				# res = self.return_results(results)
+				print "Error: missing profile ID!"
+		except TypeError, error:
+			print "There was an API error: %s " % (error)
+		except HttpError, error:
+			print "There was an API error: %s " % (error)
+		except AccessTokenRefreshError:
+			print "The credentials have been revoked or expired, please re-run app to reauthorize."
+		except:
+		 	print "Did you provide a profile id and a path as cli arguments? (Do you need to?) Try again."
+		else: # should run if it did not hit an except clause
+			return self.hash_by_day()
 
 
 if __name__ == '__main__':
