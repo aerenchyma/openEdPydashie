@@ -144,35 +144,12 @@ def sec_buzzwords():
     send_event('secbuzzwords', buzzwords_data)
 
 # this is making the graph happen
-# TODO make the graphs real data, careful about limit hits and updates
-def sample_convergence(): # this needs to refresh and change, which it isn't now doing
-    # TODO need new class like gti, except for ONE DAY at a time range -- put it in, start and end
-    # TODO cont: be able to specify a time range and then have it do the days OVER TIME
-    #smp = gti()
-    #smp.return_info()["Total Page Views"]
-
+# TODO error checking, limit hits and updates
+def sample_convergence(): 
     gl = gdf(90)
     datalists = gl.main()
     items = [{'x':int(ld[0]),'y':ld[1][0][1]} for ld in list(enumerate(datalists))]
     item_data = {'points': list(items)}
-
-    # global seedX
-    # if not seedX:
-    #      seedX = 0
-    # items.append({'x':seedX, 
-    #               'y':random.randint(0,26)})
-    # s = sum([d['y'] for d in items])
-    # items.append({'x':seedX,'y':s})
-    # seedX += 1
-
-
-    # if len(items) > 32:
-    #     items.popleft()
-    # item_data = {'points': list(items)}
-    # totalval = sum([item['y'] for item in items])
-    # displayedValue = totalval
-    #item_data['current'] = 111111
-    #print "total:", displayedValue
     send_event('convergence', item_data)
 
 def sec_convergence(days_back=30):
