@@ -390,7 +390,7 @@ class GA_Info_forTime(GA_Text_Info):
 		# return query.execute()
 		end = start #+ timedelta(days=1)
 		#end = date.today()
-		return self.service.data().ga().get(ids='ga:%s' % (profile_id), start_date=str(start),end_date=str(end),metrics='ga:pageviews',dimensions='ga:date',filters='ga:pagePath==%s' % (self.paramlist[1])).execute()#(sys.argv[2])).execute()
+		return self.service.data().ga().get(ids='ga:%s' % (profile_id), start_date=str(start),end_date=str(end),metrics='ga:pageviews',dimensions='ga:date',filters='ga:pagePath==%s' % (self.paramlist_second[1])).execute()#(sys.argv[2])).execute()
 	
 	def main(self):
 		self.service = self.initialize_service()
@@ -412,6 +412,15 @@ class GA_Info_forTime(GA_Text_Info):
 			return self.hash_by_day()
 
 
+class GA_dls_forTime(GA_Info_forTime):
+	def get_results(self, service, profile_id, start): # start should be a proper start date, and it should be whatever SINGLE date, which is gotten by in a wrapper timedeltaing from start of pd to today
+		# query = service.data().ga().get(ids='ga:%s' % profile_id, start_date='2010-03-01',end_date='2013-05-15',metrics='ga:pageviews',dimensions='ga:pagePath',filters='ga:pagePath==%s' % (sys.argv[2]))
+		# return query.execute()
+		end = start #+ timedelta(days=1)
+		#end = date.today()
+		return self.service.data().ga().get(ids='ga:%s' % (profile_id), start_date=str(start),end_date=str(end),metrics='ga:pageviews',dimensions='ga:date',filters='ga:pagePath==%s' % (self.paramlist[1])).execute() # paramlist holds dls, _second holds views
+		# everything else is the same
+		
 if __name__ == '__main__':
 	## TESTING (pre unit tests)
 	#main(sys.argv)

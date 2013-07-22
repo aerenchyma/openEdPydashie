@@ -16,7 +16,8 @@ from repeated_timer import RepeatedTimer
 from flask import Flask, render_template, Response, send_from_directory, request, current_app
 from googleanalytics_apiaccess_timeseries_try import GA_Text_Info as gti 
 from googleanalytics_apiaccess_timeseries_try import get_country
-from googleanalytics_apiaccess_timeseries_try import GA_Info_forTime as gft 
+from googleanalytics_apiaccess_timeseries_try import GA_Info_forTime as gft
+from googleanalytics_apiaccess_timeseries_try import GA_dls_forTime as gdf  
 
 
 ## TODO: choose time range (html5 date input management? or jquery?)
@@ -147,24 +148,29 @@ def sec_buzzwords():
 def sample_convergence(): # this needs to refresh and change, which it isn't now doing
     # TODO need new class like gti, except for ONE DAY at a time range -- put it in, start and end
     # TODO cont: be able to specify a time range and then have it do the days OVER TIME
-    smp = gti()
+    #smp = gti()
     #smp.return_info()["Total Page Views"]
 
-    global seedX
-    if not seedX:
-         seedX = 0
-    items.append({'x':seedX, 
-                  'y':random.randint(0,26)})
-    s = sum([d['y'] for d in items])
-    items.append({'x':seedX,'y':s})
-    seedX += 1
-
-
-    if len(items) > 32:
-        items.popleft()
+    gl = gdf(90)
+    datalists = gl.main()
+    items = [{'x':int(ld[0]),'y':ld[1][0][1]} for ld in list(enumerate(datalists))]
     item_data = {'points': list(items)}
-    totalval = sum([item['y'] for item in items])
-    displayedValue = totalval
+
+    # global seedX
+    # if not seedX:
+    #      seedX = 0
+    # items.append({'x':seedX, 
+    #               'y':random.randint(0,26)})
+    # s = sum([d['y'] for d in items])
+    # items.append({'x':seedX,'y':s})
+    # seedX += 1
+
+
+    # if len(items) > 32:
+    #     items.popleft()
+    # item_data = {'points': list(items)}
+    # totalval = sum([item['y'] for item in items])
+    # displayedValue = totalval
     #item_data['current'] = 111111
     #print "total:", displayedValue
     send_event('convergence', item_data)
@@ -189,7 +195,7 @@ def get_vid_ids():
     return vid_ids
 
 def youtube_stats(days_back=30):
-    """Let's try doing YT stuff with the buzzwordsy widget"""
+    """YT stats-getting and showing with the buzzwordsy widget"""
     # TODO get actual vids from page
     #mats = "http://open.umich.edu%s" % (infofile.pgpath) + "/materials" # hmm
     vids = get_vid_ids() #["IT3i6KIXfhc"] # placeholder    
@@ -237,22 +243,19 @@ if __name__ == "__main__":
     # calling functions at first so immediate data on run; update after a day of time
     get_vid_ids()
     youtube_stats()
-
     sample_buzzwords()
     sec_buzzwords()
-
+    # sample_convergence()
+    # sample_convergence()
+    # sample_convergence()
     sample_convergence()
-    sample_convergence()
-    sample_convergence()
-    sample_convergence()
-
     # sec_convergence()
     # sec_convergence()
     # sec_convergence()
     sec_convergence()
 
     refreshJobs = [
-        (sample_synergy, 10,), # TODO replace this w/ YT (?) or figure out what to do with it
+        #(sample_synergy, 10,), # using this? if so TODO figure out what to do with it
         (sample_buzzwords, 86400,), # 86400 seconds in a day
         (sec_buzzwords, 86400,),
         (sample_convergence, 86400,),
