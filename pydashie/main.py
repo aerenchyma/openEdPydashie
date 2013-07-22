@@ -170,40 +170,11 @@ def sample_convergence(): # this needs to refresh and change, which it isn't now
     send_event('convergence', item_data)
 
 def sec_convergence(days_back=30):
-
-#     datalists = [[('20130623', 0)],[('20130624', 1)],[('20130625', 0)],[('20130626', 2)],[('20130627', 1)],
-# [('20130628', 6)],
-# [('20130629', 2)],
-# [('20130630', 4)],
-# [('20130701', 2)],
-# [('20130702', 0)],
-# [('20130703', 1)],
-# [('20130704', 1)],
-# [('20130705', 0)],
-# [('20130706', 2)],
-# [('20130707', 0)],
-# [('20130708', 2)],
-# [('20130709', 1)],
-# [('20130710', 0)],
-# [('20130711', 1)],
-# [('20130712', 1)],
-# [('20130713', 2)],
-# [('20130714', 2)],
-# [('20130715', 3)],
-# [('20130716', 0)],
-# [('20130717', 5)],
-# [('20130718', 2)],
-# [('20130719', 3)],
-# [('20130720', 0)],
-# [('20130721', 1)],
-#[('20130722', 0)]] # testing testing, changed that 6 from another number
-
     gt = gft(90) # past 90 days
     datalists = gt.main()
     items = [{'x':int(ld[0]),'y':ld[1][0][1]} for ld in list(enumerate(datalists))]
     item_data = {'points': list(items)}
     send_event('sec_convergence', item_data)
-
  
 def id_from_url(url):
     index = url.find("watch?v=") + 8
