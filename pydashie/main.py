@@ -114,7 +114,7 @@ def sample_buzzwords():
     """Nations the given page/path(s) was viewed from + number of times viewed"""
     df = gti(90)
     nations_vals = df.get_more_info_tups()
-    print nations_vals
+    #print nations_vals
     items = [{'label': country[0], 'value': country[1]} for country in nations_vals]
     buzzwords_data = {'items':items}
     send_event('buzzwords', buzzwords_data)
@@ -123,7 +123,7 @@ def sec_buzzwords():
     """Cities, same otherwise"""
     dt = gti(90)
     cities_vals = dt.get_cities_tups()
-    print cities_vals
+    #print cities_vals
     cvals = [(city[0],get_country(city[0]),city[1]) for city in cities_vals]
     items = [{'label':city[0]+", "+city[1], 'value': city[2]} for city in cvals]
     buzzwords_data = {'items':items}
@@ -132,14 +132,14 @@ def sec_buzzwords():
 # this is making the graph happen
 # TODO error checking, limit hits and updates
 def sample_convergence(): 
-    gl = gdf(90)
+    gl = gdf(60)
     datalists = gl.main()
     items = [{'x':int(ld[0]),'y':ld[1][0][1]} for ld in list(enumerate(datalists))]
     item_data = {'points': list(items)}
     send_event('convergence', item_data)
 
 def sec_convergence(days_back=30):
-    gt = gft(90) # past 90 days
+    gt = gft(60) # past 90 days
     datalists = gt.main()
     items = [{'x':int(ld[0]),'y':ld[1][0][1]} for ld in list(enumerate(datalists))]
     item_data = {'points': list(items)}
