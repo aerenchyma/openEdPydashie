@@ -145,6 +145,7 @@ class GABulkDownloads_Views(GoogleAnalyticsData):
 		self.TOKEN_FILE_NAME = 'analytics.dat'
 
 	def get_bulk_dl_link(self):
+		url = None
 		try:
 			import mechanize
 			br = mechanize.Browser()
@@ -160,7 +161,10 @@ class GABulkDownloads_Views(GoogleAnalyticsData):
 				# else:
 				# 	print "No bulk download available"
 				# 	#return 0
-			return url[len("http://open.umich.edu"):] # if no Download All, error -- needs checking + graceful handling
+			if url:
+				return url[len("http://open.umich.edu"):] # if no Download All, error -- needs checking + graceful handling
+			else:
+				return 0
 
 	def get_results_other(self, service, profile_id):
 		# query = service.data().ga().get(ids='ga:%s' % profile_id, start_date='2010-03-01',end_date='2013-05-15',metrics='ga:pageviews',dimensions='ga:pagePath',filters='ga:pagePath==%s' % (sys.argv[2]))
@@ -262,7 +266,7 @@ class GA_Text_Info(GABulkDownloads_Views):
 		start = self.proper_start_date()
 		end = str(date.today())
 		results = self.service.data().ga().get(ids='ga:%s' % (self.profile_id), start_date=start,end_date=end,metrics='ga:pageviews',dimensions='ga:country',sort='-ga:pageviews',filters='ga:pagePath==%s' % (self.paramlist[1])).execute()#(sys.argv[2])).execute()
-		if results:
+		if results and results.get('rows'):
 			# for x in results.get('rows'):
 			# 	print x
 			top_nations = [(x[0].encode('utf-8'), x[1].encode('utf-8')) for x in results.get('rows') if "not set" not in x[0].encode('utf-8')][:top_what]
@@ -280,7 +284,7 @@ class GA_Text_Info(GABulkDownloads_Views):
 		start = self.proper_start_date()
 		end = str(date.today())
 		results = self.service.data().ga().get(ids='ga:%s' % (self.profile_id), start_date=start,end_date=end,metrics='ga:pageviews',dimensions='ga:city',sort='-ga:pageviews',filters='ga:pagePath==%s' % (self.paramlist[1])).execute()#(sys.argv[2])).execute()
-		if results:
+		if results and results.get('rows'):
 			# for x in results.get('rows'):
 			# 	print x
 			top_cities = [(x[0].encode('utf-8'), x[1].encode('utf-8')) for x in results.get('rows') if "not set" not in x[0].encode('utf-8')][:top_what]
@@ -420,7 +424,7 @@ class GA_dls_forTime(GA_Info_forTime):
 		#end = date.today()
 		return self.service.data().ga().get(ids='ga:%s' % (profile_id), start_date=str(start),end_date=str(end),metrics='ga:pageviews',dimensions='ga:date',filters='ga:pagePath==%s' % (self.paramlist[1])).execute() # paramlist holds dls, _second holds views
 		# everything else is the same
-		
+
 if __name__ == '__main__':
 	## TESTING (pre unit tests)
 	#main(sys.argv)

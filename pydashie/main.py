@@ -115,19 +115,21 @@ def sample_buzzwords():
     df = gti(90)
     nations_vals = df.get_more_info_tups()
     #print nations_vals
-    items = [{'label': country[0], 'value': country[1]} for country in nations_vals]
-    buzzwords_data = {'items':items}
-    send_event('buzzwords', buzzwords_data)
+    if nations_vals is not None:
+        items = [{'label': country[0], 'value': country[1]} for country in nations_vals]
+        buzzwords_data = {'items':items}
+        send_event('buzzwords', buzzwords_data)
 
 def sec_buzzwords():
     """Cities, same otherwise"""
     dt = gti(90)
     cities_vals = dt.get_cities_tups()
     #print cities_vals
-    cvals = [(city[0],get_country(city[0]),city[1]) for city in cities_vals]
-    items = [{'label':city[0]+", "+city[1], 'value': city[2]} for city in cvals]
-    buzzwords_data = {'items':items}
-    send_event('secbuzzwords', buzzwords_data)
+    if cities_vals is not None:
+        cvals = [(city[0],get_country(city[0]),city[1]) for city in cities_vals]
+        items = [{'label':city[0]+", "+city[1], 'value': city[2]} for city in cvals]
+        buzzwords_data = {'items':items}
+        send_event('secbuzzwords', buzzwords_data)
 
 # this is making the graph happen
 # TODO error checking, limit hits and updates
@@ -139,10 +141,12 @@ def sample_convergence():
     send_event('convergence', item_data)
 
 def sec_convergence(days_back=30):
-    gt = gft(60) # past 90 days
+    gt = gft(60) # past 60 days
     datalists = gt.main()
     items = [{'x':int(ld[0]),'y':ld[1][0][1]} for ld in list(enumerate(datalists))]
-    item_data = {'points': list(items)}
+    total = sum([it['y'] for it in items])
+    display = [{'x':32,'y':total}]
+    item_data = {'points': list(items), 'displaytotal':list(display)}
     send_event('sec_convergence', item_data)
  
 def id_from_url(url):
@@ -176,7 +180,7 @@ def youtube_stats(days_back=30):
             videos = json.loads(resp.text)['data']['items']
             #aggregateStats['ratings'] += int(videos[0]['ratingCount'])
             aggregateStats['views'] += int(videos[0]['viewCount'])
-            aggregateStats['likes'] += int(videos[0]['likeCount'])
+            #aggregateStats['likes'] += int(videos[0]['likeCount'])
             aggregateStats['comments'] += int(videos[0]['commentCount'])
             #aggregateStats['favs'] += int(videos[0]['favoriteCount'])
 
