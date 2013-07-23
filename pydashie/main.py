@@ -180,11 +180,12 @@ def youtube_stats(days_back=30):
             videos = json.loads(resp.text)['data']['items']
             #aggregateStats['ratings'] += int(videos[0]['ratingCount'])
             aggregateStats['views'] += int(videos[0]['viewCount'])
-            #aggregateStats['likes'] += int(videos[0]['likeCount'])
+            if videos[0]['likeCount'] is not None:
+                aggregateStats['likes'] += int(videos[0]['likeCount'])
             aggregateStats['comments'] += int(videos[0]['commentCount'])
             #aggregateStats['favs'] += int(videos[0]['favoriteCount'])
 
-            for i in items:
+            for i in items: # this is what controls what shows up; if nothing, these'll be 0
                 if i['label'] == "Total YouTube views: ":
                     i['value'] += aggregateStats['views']
                 if i['label'] == "Total YouTube comments: ":
