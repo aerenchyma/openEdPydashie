@@ -1,3 +1,37 @@
+<?php
+
+// assume global things..
+$nid = 1067; //tmp for testing
+
+$con = mysql_connect("127.0.0.1","oerpublisher","iamone2"); // no such file or directory, ??
+
+if (mysql_error($con)) {
+  echo "Failed to connect to MySQL: " . mysql_error() . "\n";
+  exit;
+}
+if (!mysql_select_db("oerpublish",$con)) {
+  echo "Could not select database\n";
+  exit;
+}
+
+
+function get_title($nid) {
+  $sql_title = "SELECT caption FROM search_node_links WHERE nid = {$nid} GROUP BY nid";
+  $result_title = mysql_query($sql_title, $con);
+  if (!$result_title) {
+    echo "DB error: could not query the database for title\n";
+    echo "MySQL Error: " . mysql_error() . "\n";
+    exit;
+  }
+  while ($r = mysql_fetch_assoc($result_title)) {
+  //echo $r['caption'];
+    $title = ucwords($r['caption']);
+  }
+  return $title;
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -54,6 +88,10 @@
 
     <li data-row="2" data-col="3" data-sizex="1" data-sizey="1">
       <div data-id="youtubestats" data-view="List" data-unordered="true" data-title="YouTube metrics" data-moreinfo="for content associated with this course" style="background-color:#003b6f"></div>
+    </li>
+
+    <li data-row="2" data-col="4" data-sizex="1" data-sizey="1">
+      <div data-id="" data-view="Number" data-title="<?php echo get_title($nid); ?>" data-moreinfo="let us see" style="background-color:#003b6f"></div>
     </li>
 
   </ul>

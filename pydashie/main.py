@@ -36,9 +36,14 @@ seedX = 0
 # else:
 #     days_back = db
 
+@app.route("/?choosecourse=<num>")
 @app.route("/")
 def hello():
-    return render_template('main.html', title='pyDashie')
+
+    return render_template('main.php', title='pyDashie')
+    
+
+
 
 @app.route("/assets/application.js")
 def javascripts():
@@ -210,12 +215,12 @@ if __name__ == "__main__":
     # TODO make this neater
     # calling functions at first so immediate data on run; update after a day of time running
     # (startup will run these and thus update)
-    get_vid_ids()
-    youtube_stats()
-    sample_buzzwords()
-    sec_buzzwords()
-    sample_convergence()
-    sec_convergence()
+    # get_vid_ids()
+    # youtube_stats()
+    # sample_buzzwords()
+    # sec_buzzwords()
+    # sample_convergence()
+    # sec_convergence()
 
     refreshJobs = [
         #(sample_synergy, 10,), # using this? if so TODO figure out what to do with it

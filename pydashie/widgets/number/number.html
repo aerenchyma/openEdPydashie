@@ -2,8 +2,54 @@
 
 <h2 class="value" data-bind="current | shortenedNumber | prepend prefix"></h2>
 
-<p class="change-rate"> 
+<!-- <p class="change-rate"> 
   <i data-bind-class="arrow"></i><span data-bind="difference"></span>
+</p> -->
+
+<?php
+
+// assume global things..
+$nid = 1067; //tmp for testing
+
+$con = mysql_connect("127.0.0.1","oerpublisher","iamone2"); // no such file or directory, ??
+
+if (mysql_error($con)) {
+  echo "Failed to connect to MySQL: " . mysql_error() . "\n";
+  exit;
+}
+if (!mysql_select_db("oerpublish",$con)) {
+  echo "Could not select database\n";
+  exit;
+}
+
+
+function get_title() {
+  $nid = 1067;
+  $sql_title = "SELECT caption FROM search_node_links WHERE nid = {$nid} GROUP BY nid";
+  $result_title = mysql_query($sql_title, $con);
+  if (!$result_title) {
+    echo "DB error: could not query the database for title\n";
+    echo "MySQL Error: " . mysql_error() . "\n";
+    exit;
+  }
+  while ($r = mysql_fetch_assoc($result_title)) {
+  //echo $r['caption'];
+    $title = ucwords($r['caption']);
+  }
+  return $title;
+}
+
+?>
+
+<p><form name="testform" action="" >
+				Choose a course: <br />
+				<select name="choosecourse">
+				<option value="" selected="selected">None Selected</option>
+				<option value="{$nid}">General Physics 1</option>
+				<option value="1048">Networks</option>
+				</select>
+				<input type="submit" value="Submit" onclick="get_title();">
+			</form>
 </p>
 
 <p class="more-info" data-bind="moreinfo | raw"></p>
