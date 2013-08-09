@@ -10,6 +10,7 @@
 
   <!-- The javascript and css are managed by sprockets. The files can be found in the /assets folder-->
   <script type="text/javascript" src="/assets/application.js"></script>
+  <script type="text/javascript" src="../javascripts/jquery.js"></script>
   <link rel="stylesheet" href="/assets/application.css">
 
   <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700' rel='stylesheet' type='text/css'>
@@ -22,6 +23,7 @@
 
 <script type="text/javascript">
   function generate(choosecourse) {
+    
     //alert("function!");
     //alert(choosecourse);
     //alert(document.getElementById("testform").value);
@@ -38,7 +40,7 @@
     // list.appendChild(li);
     var list = document.getElementById("widgetlist");
     list.children[0].innerHTML="hello world";
-
+    $.event.preventDefault();
     //document.getElementById("widgetlist").appendChild(node);
     //$('<li data-row="3" data-col="1" data-sizex="1" data-sizey="1"><div data-id="convergence" data-view="Graph" data-title="Downloads over other months" style="background-color:#3385FF"></div></li>').appendTo("#widgetlist");
     //list.appendChild(' <li data-row="3" data-col="1" data-sizex="1" data-sizey="1"><div data-id="convergence" data-view="Graph" data-title="Downloads over other months" style="background-color:#3385FF"></div></li>');
