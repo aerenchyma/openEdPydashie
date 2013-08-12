@@ -206,10 +206,16 @@ def close_stream(*args, **kwargs):
 
 if __name__ == "__main__":
     SocketServer.BaseServer.handle_error = close_stream
+
+    # try:
+    #     tf = open("infofile.py", "r")
+    # except:
+        #make_infofile()
     
     # TODO make this neater
     # calling functions at first so immediate data on run; update after a day of time running
     # (startup will run these and thus update)
+    #make_infofile()
     get_vid_ids()
     youtube_stats()
     sample_buzzwords()
