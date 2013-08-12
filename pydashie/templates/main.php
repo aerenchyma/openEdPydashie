@@ -22,12 +22,17 @@
 </head>
 
 <script type="text/javascript">
+  list = document.getElementById("widgetlist");
+
+
+  //var kid = list.children[0];
   function generate(choosecourse) {
-    
+    //if (choosecourse.preventDefault) choosecourse.preventDefault();
+    //window.list = document.getElementById("widgetlist");
     //alert("function!");
     //alert(choosecourse);
     //alert(document.getElementById("testform").value);
-    var elem = document.getElementById("testform");
+    //var elem = document.getElementById("testform");
     //alert(elem.choosecourse.length);
     //alert(elem.choosecourse.options[elem.choosecourse.selectedIndex].value);
     //document.write('<p>hello </p>');
@@ -38,14 +43,27 @@
     // p.appendChild(t);
     // li.appendChild(p);
     // list.appendChild(li);
-    var list = document.getElementById("widgetlist");
-    list.children[0].innerHTML="hello world";
-    $.event.preventDefault();
+    //var list = document.getElementById("widgetlist");
+    //list.children[0].outerHTML = "hello world";
+    //window.list.children[0].innerHTML="hello world";
+    //$.event.preventDefault();
     //document.getElementById("widgetlist").appendChild(node);
     //$('<li data-row="3" data-col="1" data-sizex="1" data-sizey="1"><div data-id="convergence" data-view="Graph" data-title="Downloads over other months" style="background-color:#3385FF"></div></li>').appendTo("#widgetlist");
     //list.appendChild(' <li data-row="3" data-col="1" data-sizex="1" data-sizey="1"><div data-id="convergence" data-view="Graph" data-title="Downloads over other months" style="background-color:#3385FF"></div></li>');
     //alert("checking"); 
+    //kid.innerHTML = "NEW hello world";
+    alert("is this working?");
+    list.children[0].innerHTML = "NEW hello world";
+    alert(list.children[0].innerHTML);
+    //return false;
   }
+
+  // var form = document.getElementById('testform');
+  // if (form.attachEvent) {
+  //   form.attachEvent("submit", generate);
+  // } else {
+  //   form.addEventListener("submit", generate);
+  // }
 </script>
 
 
