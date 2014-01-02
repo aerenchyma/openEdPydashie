@@ -3,6 +3,12 @@ import infofile
 import urllib
 import googleanalytics_apiaccess_timeseries_try as gatt 
 
+
+# this is the one that needs the correction / needs the hack:
+# we're acccessing the actual page instead of GA filters
+# so I'm gonna put them in a list in infofile and run it manually
+# and THEN figure out how to do it properly
+
 # correct response?
 def get_material_links(course_mat_pg=infofile.pgpath):
 	html_doc = urllib.urlopen('http://open.umich.edu%s/materials' % course_mat_pg)
